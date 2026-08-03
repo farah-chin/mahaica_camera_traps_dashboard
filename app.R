@@ -33,6 +33,7 @@ library(RColorBrewer)
 library(httr2)
 library(jsonlite)
 library(vegan)
+library(httr)
   
 
 
@@ -168,10 +169,10 @@ waterways_geojson    <- NULL
 waterways_load_error <- NULL
 
 tryCatch({
-  url  <- paste0(SUPABASE_URL, "/rest/v1/mahaica_waterways?select=*")
+  url  <- paste0(supabase_url, "/rest/v1/mahaica_waterways?select=*")
   resp <- GET(url, add_headers(
-    "apikey"        = SUPABASE_KEY,
-    "Authorization" = paste("Bearer", SUPABASE_KEY),
+    "apikey"        = anon_key,
+    "Authorization" = paste("Bearer", anon_key),
     "Accept"        = "application/geo+json"
   ))
   if (http_error(resp))
@@ -305,6 +306,7 @@ ui <- page_navbar(
         ),
         
         checkboxInput("show_labels", "Show camera labels", value = FALSE),
+        checkboxInput("show_waterways", "Show river features",  value = TRUE),
         
         hr(),
         
@@ -597,6 +599,7 @@ server <- function(input, output, session) {
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
       # Report bounds back to Shiny on every move so charts can filter by extent
+
       htmlwidgets::onRender(
         "
         function(el, x) {
@@ -626,6 +629,22 @@ server <- function(input, output, session) {
     proxy <- leafletProxy("map") %>%
       clearMarkers() %>%
       clearControls() %>%
+      clearGroup("waterways")
+    
+    # # River features drawn first so they sit underneath all point markers
+    # if (isTRUE(input$show_waterways) && !is.null(waterways_geojson)) {
+    #   proxy %>%
+    #     addGeoJSON(
+    #       geojson    = waterways_geojson,
+    #       group      = "waterways",
+    #       color      = "#4A90D9",
+    #       weight     = 2,
+    #       opacity    = 0.7,
+    #       fill       = FALSE
+    #     )
+    # }
+    
+    proxy %>%
       addCircleMarkers(
         data = cs,
         lng = ~ DDLon,
