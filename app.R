@@ -46,9 +46,9 @@ setwd(this.path::here())
 
 # connecting from supabase
 
-anon_key <- Sys.getenv("SUPABASE_KEY")
+SUPABASE_KEY <- Sys.getenv("SUPABASE_KEY")
 
-supabase_url <- Sys.getenv("SUPABASE_URL")
+SUPABASE_URL <- Sys.getenv("SUPABASE_URL")
 
 locations_url <- paste0("https://aeckuwcnusvrhrpbthgs.supabase.co/rest/v1/mahaica_camera_traps")
 
@@ -56,10 +56,10 @@ observations_url <- paste0("https://aeckuwcnusvrhrpbthgs.supabase.co/rest/v1/cam
 
 species_url <- paste0("https://aeckuwcnusvrhrpbthgs.supabase.co/rest/v1/species_info")
 
-waterways_url <- paste0(supabase_url, "/rest/v1/mahaica_waterways")
+waterways_url <- paste0(SUPABASE_URL, "/rest/v1/mahaica_waterways")
 
 # get_supabase_table <- function(url,
-#                                key = anon_key,
+#                                key = SUPABASE_KEY,
 #                                page_size = 1000) {
 #   start <- 0
 #   results <- list()
@@ -87,7 +87,7 @@ waterways_url <- paste0(supabase_url, "/rest/v1/mahaica_waterways")
 # }
 
 get_supabase_table <- function(url,
-                               key = anon_key,
+                               key = SUPABASE_KEY,
                                page_size = 1000,
                                return_type = c("data.frame", "sf"),
                                geom_col = "geom",
@@ -169,10 +169,10 @@ waterways_geojson    <- NULL
 waterways_load_error <- NULL
 
 tryCatch({
-  url  <- paste0(supabase_url, "/rest/v1/mahaica_waterways?select=*")
+  url  <- paste0(SUPABASE_URL, "/rest/v1/mahaica_waterways?select=*")
   resp <- GET(url, add_headers(
-    "apikey"        = anon_key,
-    "Authorization" = paste("Bearer", anon_key),
+    "apikey"        = SUPABASE_KEY,
+    "Authorization" = paste("Bearer", SUPABASE_KEY),
     "Accept"        = "application/geo+json"
   ))
   if (http_error(resp))
@@ -182,6 +182,9 @@ tryCatch({
   waterways_load_error <<- e$message
   message("Could not load waterways: ", e$message)
 })
+
+print(waterways_load_error)
+print(is.null(waterways_geojson))
 
 # Merge tables using DeploymentID
 # dashboard_data <- deployments %>%
