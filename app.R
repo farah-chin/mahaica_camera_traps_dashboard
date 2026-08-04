@@ -58,34 +58,6 @@ species_url <- paste0("https://aeckuwcnusvrhrpbthgs.supabase.co/rest/v1/species_
 
 waterways_url <- paste0(SUPABASE_URL, "/rest/v1/mahaica_waterways")
 
-# get_supabase_table <- function(url,
-#                                key = SUPABASE_KEY,
-#                                page_size = 1000) {
-#   start <- 0
-#   results <- list()
-#   
-#   repeat {
-#     end <- start + page_size - 1
-#     
-#     resp <- request(url) |>
-#       req_headers(
-#         apikey = key,
-#         Authorization = paste("Bearer", key),
-#         Range = paste0(start, "-", end)
-#       ) |>
-#       req_perform()
-#     chunk <- resp_body_json(resp, simplifyVector = TRUE)
-#     if (nrow(chunk) == 0)
-#       break
-#     results[[length(results) + 1]] <- chunk
-#     if (nrow(chunk) < page_size)
-#       break
-#     start <- start + page_size
-#   }
-#   
-#   bind_rows(results)
-# }
-
 get_supabase_table <- function(url,
                                key = SUPABASE_KEY,
                                page_size = 1000,
@@ -169,18 +141,31 @@ waterways_geojson    <- NULL
 waterways_load_error <- NULL
 
 tryCatch({
-  url  <- paste0(SUPABASE_URL, "/rest/v1/mahaica_waterways?select=*")
-  resp <- GET(url, add_headers(
-    "apikey"        = SUPABASE_KEY,
-    "Authorization" = paste("Bearer", SUPABASE_KEY),
-    "Accept"        = "application/geo+json"
-  ))
-  if (http_error(resp))
-    stop("HTTP ", status_code(resp))
-  waterways_geojson <<- content(resp, as = "text", encoding = "UTF-8")
+  url <- paste0(SUPABASE_URL, "/rest/v1/mahaica_waterways?select=*")
+  resp <- GET(
+    url,
+    add_headers(
+      "apikey"        = SUPABASE_KEY,
+      "Authorization" = paste("Bearer", SUPABASE_KEY),
+      "Accept"        = "application/geo+json"
+    )
+  )
+  
+  if (httr::http_error(resp)) {
+    stop("HTTP ", httr::status_code(resp))
+  }
+  
+  waterways_geojson <- httr::content(
+    resp,
+    as = "text",
+    encoding = "UTF-8"
+  )
+  
 }, error = function(e) {
-  waterways_load_error <<- e$message
-  message("Could not load waterways: ", e$message)
+  
+  waterways_load_error <<- conditionMessage(e)
+  message("Could not load waterways: ", conditionMessage(e))
+  
 })
 
 # Merge tables using DeploymentID
@@ -590,7 +575,6 @@ server <- function(input, output, session) {
     # %>% left_join(locations %>% select(DeploymentLabel, start_date, end_date, shannon))
   })
   
-  # leaflet(locations) %>%
   
   
   output$map <- renderLeaflet({
@@ -631,18 +615,18 @@ server <- function(input, output, session) {
       clearControls() %>%
       clearGroup("waterways")
     
-    # # River features drawn first so they sit underneath all point markers
-    # if (isTRUE(input$show_waterways) && !is.null(waterways_geojson)) {
-    #   proxy %>%
-    #     addGeoJSON(
-    #       geojson    = waterways_geojson,
-    #       group      = "waterways",
-    #       color      = "#4A90D9",
-    #       weight     = 2,
-    #       opacity    = 0.7,
-    #       fill       = FALSE
-    #     )
-    # }
+    # River features drawn first so they sit underneath all point markers
+    if (isTRUE(input$show_waterways) && !is.null(waterways_geojson)) {
+      proxy %>%
+        addGeoJSON(
+          geojson    = waterways_geojson,
+          group      = "waterways",
+          color      = "#4A90D9",
+          weight     = 2,
+          opacity    = 0.7,
+          fill       = FALSE
+        )
+    }
     
     proxy %>%
       addCircleMarkers(
