@@ -34,7 +34,7 @@ library(httr2)
 library(jsonlite)
 library(vegan)
 library(httr)
-  
+
 
 
 # ----- 2. LOAD AND PREPARE DATA -----
@@ -64,7 +64,6 @@ get_supabase_table <- function(url,
                                return_type = c("data.frame", "sf"),
                                geom_col = "geom",
                                crs = 4326) {
-  
   return_type <- match.arg(return_type)
   
   start <- 0
@@ -79,10 +78,7 @@ get_supabase_table <- function(url,
         Range = paste0(start, "-", end)
       ) |>
       httr2::req_perform()
-    chunk <- httr2::resp_body_json(
-      resp,
-      simplifyVector = TRUE
-    )
+    chunk <- httr2::resp_body_json(resp, simplifyVector = TRUE)
     if (length(chunk) == 0)
       break
     results[[length(results) + 1]] <- chunk
@@ -100,24 +96,15 @@ get_supabase_table <- function(url,
   
   # Convert to sf
   if (return_type == "sf") {
-    
     if (!geom_col %in% names(data)) {
-      stop(
-        paste0(
-          "The geometry column '",
-          geom_col,
-          "' was not found in the returned data."
-        )
-      )
+      stop(paste0(
+        "The geometry column '",
+        geom_col,
+        "' was not found in the returned data."
+      ))
     }
     
-    return(
-      sf::st_as_sf(
-        data,
-        wkt = geom_col,
-        crs = crs
-      )
-    )
+    return(sf::st_as_sf(data, wkt = geom_col, crs = crs))
   }
 }
 
@@ -155,14 +142,9 @@ tryCatch({
     stop("HTTP ", httr::status_code(resp))
   }
   
-  waterways_geojson <- httr::content(
-    resp,
-    as = "text",
-    encoding = "UTF-8"
-  )
+  waterways_geojson <- httr::content(resp, as = "text", encoding = "UTF-8")
   
 }, error = function(e) {
-  
   waterways_load_error <<- conditionMessage(e)
   message("Could not load waterways: ", conditionMessage(e))
   
@@ -291,7 +273,7 @@ ui <- page_navbar(
         ),
         
         checkboxInput("show_labels", "Show camera labels", value = FALSE),
-        checkboxInput("show_waterways", "Show river features",  value = TRUE),
+        checkboxInput("show_waterways", "Show river features", value = TRUE),
         
         hr(),
         
@@ -374,7 +356,7 @@ ui <- page_navbar(
           card(
             full_screen = TRUE,
             card_header(icon("chart-line"), "Species Accumulation Curve"),
-            plotOutput("cumulative_species", height = "380px")
+            plotlyOutput("cumulative_species", height = "380px")
           ),
           card(
             full_screen = TRUE,
@@ -579,11 +561,11 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     leaflet(locations) %>%
-      fitBounds( ~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
+      fitBounds(~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
       # Report bounds back to Shiny on every move so charts can filter by extent
-
+      
       htmlwidgets::onRender(
         "
         function(el, x) {
@@ -616,7 +598,8 @@ server <- function(input, output, session) {
       clearGroup("waterways")
     
     # River features drawn first so they sit underneath all point markers
-    if (isTRUE(input$show_waterways) && !is.null(waterways_geojson)) {
+    if (isTRUE(input$show_waterways) &&
+        !is.null(waterways_geojson)) {
       proxy %>%
         addGeoJSON(
           geojson    = waterways_geojson,
@@ -913,7 +896,7 @@ server <- function(input, output, session) {
       labs(x = "Camera Deployment ID", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
-    p %>% ggplotly(tooltip = c("x", "y", "colour")) %>%
+    p %>% ggplotly(tooltip = c("x", "y")) %>%
       layout(hovermode = "x unified")
   })
   
@@ -929,14 +912,14 @@ server <- function(input, output, session) {
       labs(x = "Species", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
-    p %>% ggplotly(tooltip = c("x", "y", "colour")) %>%
-      layout(hovermode = "x unified")
+    p %>% ggplotly(tooltip = c("x", "y")) %>%
+      layout(hovermode = "y unified")
     
   })
   
   # Render species accumulation chart ----
-  output$cumulative_species <- renderPlot({
-    fdata() %>%
+  output$cumulative_species <- renderPlotly({
+    p <- fdata() %>%
       arrange(Date) %>%
       mutate(cum_unique = cumsum(!duplicated(SpeciesCommonName))) %>%
       group_by(day = as_date(Date)) %>%
@@ -949,12 +932,14 @@ server <- function(input, output, session) {
       labs(x = "Cumulative trap days", y = "Cumulative unique species") +
       theme_minimal(base_size = 11) +
       theme(legend.position = "none")
+    
+    p %>% ggplotly()
   })
   
   # Render diel activity radial plot -----
   
   output$activity_radial_plot <- renderPlot({
-    fdata() %>%
+    p <- fdata() %>%
       mutate(Hour = hour(Date)) %>%
       count(Hour) %>%
       # Ensure all 24 hours are represented even if counts are 0
@@ -997,7 +982,7 @@ server <- function(input, output, session) {
         # Circular layout grid line numbers act as visual scale
         panel.grid.minor = element_blank()
       )
-    
+    p
   })
 }
 
