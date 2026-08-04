@@ -358,12 +358,12 @@ ui <- page_navbar(
           card(
             full_screen = TRUE,
             card_header(icon("chart-area"), "Camera Chart"),
-            plotOutput("camera_plot", height = "380px")
+            plotlyOutput("camera_plot", height = "380px")
           ),
           card(
             full_screen = TRUE,
             card_header(icon("chart-area"), "Species Chart"),
-            plotOutput("species_plot", height = "380px")
+            plotlyOutput("species_plot", height = "380px")
           )
         ),
         
@@ -899,8 +899,8 @@ server <- function(input, output, session) {
   })
   
   # Render Camera Column Chart ----
-  output$camera_plot <- renderPlot({
-    fdata() %>%
+  output$camera_plot <- renderPlotly({
+    p <- fdata() %>%
       mutate(DeploymentLabel = fct_lump_n(DeploymentLabel, 10)) %>%
       count(DeploymentLabel) %>%
       ggplot(aes(
@@ -912,11 +912,14 @@ server <- function(input, output, session) {
       theme_minimal() +
       labs(x = "Camera Deployment ID", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    
+    p %>% ggplotly(tooltip = c("x", "y", "colour")) %>%
+      layout(hovermode = "x unified")
   })
   
   # Render Species Column Chart ----
-  output$species_plot <- renderPlot({
-    fdata() %>%
+  output$species_plot <- renderPlotly({
+    p <- fdata() %>%
       mutate(SpeciesCommonName = fct_lump_n(SpeciesCommonName, 10)) %>%
       count(SpeciesCommonName) %>%
       ggplot(aes(x = reorder(SpeciesCommonName, -n), y = n)) +
@@ -925,6 +928,9 @@ server <- function(input, output, session) {
       coord_flip() +
       labs(x = "Species", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    
+    p %>% ggplotly(tooltip = c("x", "y", "colour")) %>%
+      layout(hovermode = "x unified")
     
   })
   
