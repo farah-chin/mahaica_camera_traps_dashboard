@@ -888,15 +888,16 @@ server <- function(input, output, session) {
       count(DeploymentLabel) %>%
       ggplot(aes(
         x = reorder(DeploymentLabel, -n),
-        y = n,
-        fill = DeploymentLabel
+        y = n
       )) +
-      geom_col(show.legend = FALSE) +
+      geom_col(aes(text = paste0("Deployment ID: ", DeploymentLabel, "<br>",
+                                 "Detections: ", n)),
+               show.legend = FALSE) +
       theme_minimal() +
       labs(x = "Camera Deployment ID", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
-    p %>% ggplotly(tooltip = c("x", "y")) %>%
+    p %>% ggplotly(tooltip = "text") %>%
       layout(hovermode = "x unified")
   })
   
@@ -907,12 +908,13 @@ server <- function(input, output, session) {
       count(SpeciesCommonName) %>%
       ggplot(aes(x = reorder(SpeciesCommonName, -n), y = n)) +
       theme_minimal() +
-      geom_col() +
+      geom_col(aes(text = paste0("Species: ", SpeciesCommonName, "<br>",
+                                 "Detections: ", n))) +
       coord_flip() +
       labs(x = "Species", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
-    p %>% ggplotly(tooltip = c("x", "y")) %>%
+    p %>% ggplotly(tooltip = "text") %>%
       layout(hovermode = "y unified")
     
   })
@@ -928,12 +930,13 @@ server <- function(input, output, session) {
       mutate(cum_days = row_number()) %>%
       ggplot(aes(x = cum_days, y = total_cum_unique)) +
       geom_line() +
-      geom_point() +
+      geom_point(aes(text = paste0(day, " (", cum_days, " days)", "<br>",
+                                   total_cum_unique, " cumulative unique species"))) +
       labs(x = "Cumulative trap days", y = "Cumulative unique species") +
       theme_minimal(base_size = 11) +
       theme(legend.position = "none")
     
-    p %>% ggplotly()
+    p %>% ggplotly(tooltip = "text")
   })
   
   # Render diel activity radial plot -----
