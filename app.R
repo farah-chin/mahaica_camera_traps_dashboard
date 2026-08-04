@@ -183,9 +183,6 @@ tryCatch({
   message("Could not load waterways: ", e$message)
 })
 
-print(waterways_load_error)
-print(is.null(waterways_geojson))
-
 # Merge tables using DeploymentID
 # dashboard_data <- deployments %>%
 #   inner_join(locations %>% select(DeploymentID, DDLat, DDLon), by = "DeploymentID")
