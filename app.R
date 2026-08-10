@@ -168,7 +168,7 @@ tryCatch({
 species_list <- sort(unique(dashboard_data$SpeciesCommonName))
 camera_list <- unique(dashboard_data$DeploymentLabel)
 taxa_list <- sort(unique(dashboard_data$Taxa))
-iucn_status_list <- unique(dashboard_data$IUCN_status)
+iucn_status_list <- levels(dashboard_data$IUCN_status)
 year_list <- unique(year(dashboard_data$captureDTFormatted))
 year_list <- sort(year_list[!is.na(year_list)])
 dates <- sort(unique(dashboard_data$Date))
