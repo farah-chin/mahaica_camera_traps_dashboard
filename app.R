@@ -110,7 +110,17 @@ get_supabase_table <- function(url,
 
 dashboard_data <- get_supabase_table(observations_url, return_type = "data.frame") %>%
   rename(DDLat = latitude, DDLon = longitude) %>%
-  mutate(Date = ymd_hms(capture_datetime))
+  mutate(Date = ymd_hms(capture_datetime)) %>%
+  mutate(IUCN_status = factor(
+    IUCN_status,
+    levels = c(
+      "Least Concern",
+      "Near Threatened",
+      "Vulnerable",
+      "Endangered",
+      "Data Deficient"
+    )
+  ))
 
 locations <- get_supabase_table(locations_url, return_type = "data.frame") %>%
   rename(DDLat = latitude, DDLon = longitude) %>%
@@ -895,18 +905,51 @@ server <- function(input, output, session) {
   # Render Camera Column Chart ----
   output$camera_plot <- renderPlotly({
     p <- fdata() %>%
-      mutate(DeploymentLabel = fct_lump_n(DeploymentLabel, 10)) %>% 
+      mutate(
+        DeploymentLabel = fct_lump_n(DeploymentLabel, 10)
+      ) %>%
       count(DeploymentLabel, IUCN_status) %>%
-      ggplot(aes(x = reorder(DeploymentLabel, -n, sum), y = n, fill = IUCN_status)) +
-      geom_col(position = "stack", aes(
-        text = paste0("Deployment ID: ", DeploymentLabel, "<br>", "Detections: ", n)
-      ), show.legend = FALSE) +
+      ggplot(aes(
+        x = reorder(DeploymentLabel, -n, sum),
+        y = n,
+        fill = IUCN_status,
+        group = IUCN_status
+      )) +
+      geom_col(position = position_stack(reverse = TRUE),
+               aes(
+                 text = paste0(
+                   "Deployment ID: ",
+                   DeploymentLabel,
+                   "<br>IUCN Status: ",
+                   IUCN_status,
+                   "<br>Detections: ",
+                   n
+                 )
+               ),
+               show.legend = FALSE) +
+      scale_fill_manual(
+        values = c(
+          "Least Concern" = "#2b83ba",
+          "Near Threatened" = "#abdda4",
+          "Vulnerable" = "#fdae61",
+          "Endangered" = "#d7191c",
+          "Data Deficient" = "#bababa"
+        ),
+        breaks = c(
+          "Least Concern",
+          "Near Threatened",
+          "Vulnerable",
+          "Endangered",
+          "Data Deficient"
+        ),
+        drop = FALSE
+      ) +
       theme_minimal() +
       labs(x = "Camera Deployment ID", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
-    p %>% ggplotly(tooltip = "text") %>%
-      layout(hovermode = "x unified")
+    ggplotly(p, tooltip = "text") %>%
+      layout(hovermode = "x unified", barmode = "stack")
   })
   
   # Render Species Column Chart ----
