@@ -158,6 +158,7 @@ tryCatch({
 species_list <- sort(unique(dashboard_data$SpeciesCommonName))
 camera_list <- unique(dashboard_data$DeploymentID)
 taxa_list <- sort(unique(dashboard_data$Taxa))
+iucn_status_list <- unique(dashboard_data$IUCN_status)
 year_list <- unique(year(dashboard_data$captureDTFormatted))
 year_list <- sort(year_list[!is.na(year_list)])
 dates <- sort(unique(dashboard_data$Date))
@@ -213,6 +214,13 @@ ui <- page_navbar(
         bg = "#f0f4f8",
         
         tags$h6("Filters", class = "text-muted fw-bold mt-1 mb-2"),
+        
+        selectInput(
+          "iucn_status",
+          "Select IUCN Status:",
+          choices = c("All", iucn_status_list),
+          selected = "All"
+        ),
         
         selectInput(
           "taxa",
@@ -419,6 +427,7 @@ server <- function(input, output, session) {
   # Debounce all inputs by 400ms so charts don't re-render on every
   # intermediate value during rapid slider drags or dropdown changes
   
+  iucn_status_d <- reactive(input$iucn_status) %>% debounce(400)
   taxa_d              <- reactive(input$taxa)             %>% debounce(400)
   species_d           <- reactive(input$species)          %>% debounce(400)
   camera_d            <- reactive(input$camera)           %>% debounce(400)
@@ -450,6 +459,8 @@ server <- function(input, output, session) {
     req(date_range_d())
     d <- dashboard_data %>%
       filter(Date >= date_range_d()[1], Date <= date_range_d()[2])
+    if (iucn_status_d() != "All")
+      d <- d %>% filter(IUCN_status == iucn_status_d())
     if (taxa_d() != "All")
       d <- d %>% filter(Taxa == taxa_d())
     if (species_d() != "All")
@@ -561,7 +572,7 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     leaflet(locations) %>%
-      fitBounds(~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
+      fitBounds( ~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
       # Report bounds back to Shiny on every move so charts can filter by extent
@@ -886,13 +897,10 @@ server <- function(input, output, session) {
     p <- fdata() %>%
       mutate(DeploymentLabel = fct_lump_n(DeploymentLabel, 10)) %>%
       count(DeploymentLabel) %>%
-      ggplot(aes(
-        x = reorder(DeploymentLabel, -n),
-        y = n
-      )) +
-      geom_col(aes(text = paste0("Deployment ID: ", DeploymentLabel, "<br>",
-                                 "Detections: ", n)),
-               show.legend = FALSE) +
+      ggplot(aes(x = reorder(DeploymentLabel, -n), y = n)) +
+      geom_col(aes(
+        text = paste0("Deployment ID: ", DeploymentLabel, "<br>", "Detections: ", n)
+      ), show.legend = FALSE) +
       theme_minimal() +
       labs(x = "Camera Deployment ID", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -908,8 +916,9 @@ server <- function(input, output, session) {
       count(SpeciesCommonName) %>%
       ggplot(aes(x = reorder(SpeciesCommonName, -n), y = n)) +
       theme_minimal() +
-      geom_col(aes(text = paste0("Species: ", SpeciesCommonName, "<br>",
-                                 "Detections: ", n))) +
+      geom_col(aes(
+        text = paste0("Species: ", SpeciesCommonName, "<br>", "Detections: ", n)
+      )) +
       coord_flip() +
       labs(x = "Species", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -930,8 +939,17 @@ server <- function(input, output, session) {
       mutate(cum_days = row_number()) %>%
       ggplot(aes(x = cum_days, y = total_cum_unique)) +
       geom_line() +
-      geom_point(aes(text = paste0(day, " (", cum_days, " days)", "<br>",
-                                   total_cum_unique, " cumulative unique species"))) +
+      geom_point(aes(
+        text = paste0(
+          day,
+          " (",
+          cum_days,
+          " days)",
+          "<br>",
+          total_cum_unique,
+          " cumulative unique species"
+        )
+      )) +
       labs(x = "Cumulative trap days", y = "Cumulative unique species") +
       theme_minimal(base_size = 11) +
       theme(legend.position = "none")
