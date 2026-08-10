@@ -156,7 +156,7 @@ tryCatch({
 
 # lists for selectors
 species_list <- sort(unique(dashboard_data$SpeciesCommonName))
-camera_list <- unique(dashboard_data$DeploymentID)
+camera_list <- unique(dashboard_data$DeploymentLabel)
 taxa_list <- sort(unique(dashboard_data$Taxa))
 iucn_status_list <- unique(dashboard_data$IUCN_status)
 year_list <- unique(year(dashboard_data$captureDTFormatted))
@@ -895,10 +895,10 @@ server <- function(input, output, session) {
   # Render Camera Column Chart ----
   output$camera_plot <- renderPlotly({
     p <- fdata() %>%
-      mutate(DeploymentLabel = fct_lump_n(DeploymentLabel, 10)) %>%
-      count(DeploymentLabel) %>%
-      ggplot(aes(x = reorder(DeploymentLabel, -n), y = n)) +
-      geom_col(aes(
+      mutate(DeploymentLabel = fct_lump_n(DeploymentLabel, 10)) %>% 
+      count(DeploymentLabel, IUCN_status) %>%
+      ggplot(aes(x = reorder(DeploymentLabel, -n, sum), y = n, fill = IUCN_status)) +
+      geom_col(position = "stack", aes(
         text = paste0("Deployment ID: ", DeploymentLabel, "<br>", "Detections: ", n)
       ), show.legend = FALSE) +
       theme_minimal() +
