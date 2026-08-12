@@ -902,6 +902,50 @@ server <- function(input, output, session) {
       )
   })
   
+  # Render iucn pie chart ----
+  output$iucn_status_plot <- renderPlotly({
+    colors <- c(
+      'rgb(211,94,96)',
+      'rgb(128,133,133)',
+      'rgb(144,103,167)',
+      'rgb(171,104,87)',
+      'rgb(114,147,203)'
+    )
+    fdata() %>%
+      group_by(IUCN_status) %>% count(IUCN_status) %>%
+      # ggplot(aes(x = "", y = n, fill = Taxa)) +
+      # geom_bar(stat = "identity", width = 1, color = "white") +
+      # coord_polar("y", start = 0) +
+      # theme_minimal()
+      plot_ly(
+        labels = ~ IUCN_status,
+        values = ~ n,
+        type = "pie",
+        textposition = "inside",
+        textinfo = "label+percent",
+        insidetextfont = list(color = "#FFFFFF"),
+        hoverinfo = "text",
+        text = ~ paste(n, "detections"),
+        marker = list(
+          colors = colors,
+          line = list(color = "white", width = 1)
+        ),
+        showlegend = FALSE
+      ) %>%
+      layout(
+        xaxis = list(
+          showgrid = FALSE,
+          zeroline = FALSE,
+          showticklabels = FALSE
+        ),
+        xaxis = list(
+          showgrid = FALSE,
+          zeroline = FALSE,
+          showticklabels = FALSE
+        )
+      )
+  })
+  
   # Render Camera Column Chart ----
   output$camera_plot <- renderPlotly({
     p <- fdata() %>%
@@ -918,11 +962,11 @@ server <- function(input, output, session) {
       geom_col(position = position_stack(reverse = TRUE),
                aes(
                  text = paste0(
-                   "Deployment ID: ",
+                   "<b>",
                    DeploymentLabel,
-                   "<br>IUCN Status: ",
+                   "</b><br><i>IUCN Status: ",
                    IUCN_status,
-                   "<br>Detections: ",
+                   "</i><br>Detections: ",
                    n
                  )
                ),
