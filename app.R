@@ -173,6 +173,16 @@ year_list <- unique(year(dashboard_data$captureDTFormatted))
 year_list <- sort(year_list[!is.na(year_list)])
 dates <- sort(unique(dashboard_data$Date))
 
+# iucn colour palette
+iucn_colours <- c(
+  "Least Concern" = "#5B8C5A",
+  "Near Threatened" = "#A6A85B",
+  "Vulnerable" = "#C49A5A",
+  "Endangered" = "#B86B4B",
+  "Critically Endangered" = "#8E4A4A",
+  "Data Deficient" = "#8C8C82"
+)
+
 sort_by_selector <- function(id) {
   selectizeInput(
     id,
@@ -201,6 +211,7 @@ ui <- page_navbar(
     "Mahaica Watershed Camera Trap Program"
   ),
   
+  # theme ----
   theme = bs_theme(
     bootswatch = "flatly",
     
@@ -214,8 +225,8 @@ ui <- page_navbar(
     bg        = "#F5F4EF",
     fg        = "#26332D",
     
-    base_font    = font_google("Roboto"),
-    heading_font = font_google("Open Sans")
+    base_font    = font_google("Source Sans 3"),
+    heading_font = font_google("Nunito Sans")
   ),
   
   bg = "#234F3D",
@@ -617,7 +628,7 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     leaflet(locations) %>%
-      fitBounds(~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
+      fitBounds( ~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
       # Report bounds back to Shiny on every move so charts can filter by extent
@@ -1008,13 +1019,7 @@ server <- function(input, output, session) {
                ),
                show.legend = FALSE) +
       scale_fill_manual(
-        values = c(
-          "Least Concern" = "#2b83ba",
-          "Near Threatened" = "#abdda4",
-          "Vulnerable" = "#fdae61",
-          "Endangered" = "#d7191c",
-          "Data Deficient" = "#bababa"
-        ),
+        values = iucn_colours,
         breaks = c(
           "Least Concern",
           "Near Threatened",
@@ -1069,18 +1074,20 @@ server <- function(input, output, session) {
                 .groups = "drop") %>%
       mutate(cum_days = row_number()) %>%
       ggplot(aes(x = cum_days, y = total_cum_unique)) +
-      geom_line() +
-      geom_point(aes(
-        text = paste0(
-          day,
-          " (",
-          cum_days,
-          " days)",
-          "<br>",
-          total_cum_unique,
-          " cumulative unique species"
-        )
-      )) +
+      geom_line(color = "#3F7D58", linewidth = 1.1) +
+      geom_point(color = "#234F3D",
+                 size = 2,
+                 aes(
+                   text = paste0(
+                     day,
+                     " (",
+                     cum_days,
+                     " days)",
+                     "<br>",
+                     total_cum_unique,
+                     " cumulative unique species"
+                   )
+                 )) +
       labs(x = "Cumulative trap days", y = "Cumulative unique species") +
       theme_minimal(base_size = 11) +
       theme(legend.position = "none")
