@@ -708,7 +708,7 @@ server <- function(input, output, session) {
     sort_by <- spec_list_sorter_d()
     
     
-    f_uniqueSpecies <- fdata() %>% group_by(SpeciesCommonName) %>%
+    f_uniqueSpecies <- fdata() %>% group_by(SpeciesCommonName, IUCN_status) %>%
       summarise(
         maxDate = max(Date),
         minDate = min(Date),
@@ -743,7 +743,8 @@ server <- function(input, output, session) {
         tags$strong(feed_data$SpeciesCommonName[i], style = "color: #6c757d; font-size: 1em; display: block; margin-bottom: 4px;"),
         tags$span(lapply(
           paste0(
-            "First spotted: ",
+            "<i>", feed_data$IUCN_status[i], "</i>",
+            "<br> First spotted: ",
             format(feed_data$minDate[i], "%B %d %Y, %H:%M"),
             "<br> Last spotted: ",
             format(feed_data$maxDate[i], "%B %d %Y, %H:%M"),
@@ -1004,7 +1005,14 @@ server <- function(input, output, session) {
       ggplot(aes(x = reorder(SpeciesCommonName, -n), y = n)) +
       theme_minimal() +
       geom_col(aes(
-        text = paste0("Species: ", SpeciesCommonName, "<br>", "Detections: ", n)
+        text = paste0(
+          "<b>",
+          SpeciesCommonName,
+          "</b><br><i>IUCN Status: ",
+          "IUCN_status", "</i>",
+          "<br>Detections: ",
+          n
+        )
       )) +
       coord_flip() +
       labs(x = "Species", y = "No. of detections") +
