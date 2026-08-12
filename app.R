@@ -202,15 +202,50 @@ ui <- page_navbar(
   ),
   
   theme = bs_theme(
-    bootswatch  = "flatly",
-    primary     = "#2c7bb6",
-    base_font   = font_google("Roboto"),
-    # heading_font = font_google("DM Sans")
+    bootswatch = "flatly",
+    
+    primary   = "#3F7D58",
+    secondary = "#8A6742",
+    success   = "#5B8C5A",
+    info      = "#6F9E8A",
+    warning   = "#C49A5A",
+    danger    = "#A85C4A",
+    
+    bg        = "#F5F4EF",
+    fg        = "#26332D",
+    
+    base_font    = font_google("Roboto"),
     heading_font = font_google("Open Sans")
   ),
   
-  bg = "#1a3a5c",
+  bg = "#234F3D",
   inverse = TRUE,
+  
+  tags$head(tags$style(
+    HTML(
+      "
+    .navbar {
+      background-color: #234F3D !important;
+      border-color: #234F3D !important;
+    }
+
+    .navbar-brand,
+    .navbar-nav > li > a {
+      color: #F5F4EF !important;
+    }
+
+    .navbar-nav > li > a:hover {
+      background-color: #3F7D58 !important;
+      color: #FFFFFF !important;
+    }
+
+    .navbar-nav > .active > a {
+      background-color: #3F7D58 !important;
+      color: #FFFFFF !important;
+    }
+  "
+    )
+  )),
   
   # Explorer tab -----
   
@@ -582,7 +617,7 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     leaflet(locations) %>%
-      fitBounds( ~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
+      fitBounds(~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
       # Report bounds back to Shiny on every move so charts can filter by extent
@@ -743,7 +778,9 @@ server <- function(input, output, session) {
         tags$strong(feed_data$SpeciesCommonName[i], style = "color: #6c757d; font-size: 1em; display: block; margin-bottom: 4px;"),
         tags$span(lapply(
           paste0(
-            "<i>", feed_data$IUCN_status[i], "</i>",
+            "<i>",
+            feed_data$IUCN_status[i],
+            "</i>",
             "<br> First spotted: ",
             format(feed_data$minDate[i], "%B %d %Y, %H:%M"),
             "<br> Last spotted: ",
@@ -950,9 +987,7 @@ server <- function(input, output, session) {
   # Render Camera Column Chart ----
   output$camera_plot <- renderPlotly({
     p <- fdata() %>%
-      mutate(
-        DeploymentLabel = fct_lump_n(DeploymentLabel, 10)
-      ) %>%
+      mutate(DeploymentLabel = fct_lump_n(DeploymentLabel, 10)) %>%
       count(DeploymentLabel, IUCN_status) %>%
       ggplot(aes(
         x = reorder(DeploymentLabel, -n, sum),
@@ -1009,7 +1044,8 @@ server <- function(input, output, session) {
           "<b>",
           SpeciesCommonName,
           "</b><br><i>IUCN Status: ",
-          "IUCN_status", "</i>",
+          "IUCN_status",
+          "</i>",
           "<br>Detections: ",
           n
         )
