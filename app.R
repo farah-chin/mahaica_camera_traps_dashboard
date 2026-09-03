@@ -34,6 +34,7 @@ library(httr2)
 library(jsonlite)
 library(vegan)
 library(httr)
+library(showtext)
 
 
 
@@ -182,6 +183,76 @@ iucn_colours <- c(
   "Critically Endangered" = "#8E4A4A",
   "Data Deficient" = "#8C8C82"
 )
+
+# fonts
+font_add_google("Inter", "Inter")
+font_add_google("DM Sans", "DM Sans")
+
+showtext_auto()
+
+plots_custom_theme <- function() {
+  theme_minimal(
+    base_family = "Inter",
+    base_size = 12
+  ) +
+    theme(
+      # Plot background
+      plot.background  = element_rect(
+        fill = "#F5F4EF",
+        color = NA
+      ),
+      panel.background = element_rect(
+        fill = "#F5F4EF",
+        color = NA
+      ),
+      
+      # Grid
+      panel.grid.major = element_line(
+        color = "#D9DED8",
+        linewidth = 0.35
+      ),
+      panel.grid.minor = element_blank(),
+      
+      # Axes
+      axis.title = element_text(
+        color = "#34423A",
+        size = 11
+      ),
+      axis.text = element_text(
+        color = "#526057",
+        size = 10
+      ),
+      
+      # Titles
+      plot.title = element_text(
+        family = "DM Sans",
+        face = "bold",
+        color = "#234F3D",
+        size = 16,
+        margin = margin(b = 8)
+      ),
+      plot.subtitle = element_text(
+        family = "Inter",
+        color = "#66736B",
+        size = 11,
+        margin = margin(b = 12)
+      ),
+      
+      # Legend
+      legend.title = element_text(
+        family = "DM Sans",
+        face = "bold",
+        color = "#34423A"
+      ),
+      legend.text = element_text(
+        color = "#526057"
+      ),
+      legend.position = "bottom",
+      
+      # Spacing
+      plot.margin = margin(12, 15, 12, 12)
+    )
+}
 
 sort_by_selector <- function(id) {
   selectizeInput(
@@ -1043,6 +1114,7 @@ server <- function(input, output, session) {
       mutate(SpeciesCommonName = fct_lump_n(SpeciesCommonName, 10)) %>%
       count(SpeciesCommonName) %>%
       ggplot(aes(x = reorder(SpeciesCommonName, -n), y = n)) +
+      # plots_custom_theme() +
       theme_minimal() +
       geom_col(aes(
         text = paste0(
