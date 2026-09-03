@@ -3844,6 +3844,77 @@
         "RemoteSha": "2.2.0"
       }
     },
+    "showtext": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "showtext",
+        "Type": "Package",
+        "Title": "Using Fonts More Easily in R Graphs",
+        "Version": "0.9-8",
+        "Date": "2026-03-21",
+        "Authors@R": "c(\n    person(\"Yixuan\", \"Qiu\", , \"yixuan.qiu@cos.name\", c(\"aut\", \"cre\")),\n    person(\"Dave\", \"Raggett\", , \"dsr@w3.org\", \"ctb\",\n           comment = \"UTF-8 library. See the AUTHORS file for details\")\n    )",
+        "Description": "Making it easy to use various types of fonts ('TrueType',\n    'OpenType', Type 1, web fonts, etc.) in R graphs, and supporting most output\n    formats of R graphics including PNG, PDF and SVG. Text glyphs will be converted\n    into polygons or raster images, hence after the plot has been created, it no\n    longer relies on the font files. No external software such as 'Ghostscript' is\n    needed to use this package.",
+        "Depends": "sysfonts (>= 0.7.1), showtextdb (>= 2.0)",
+        "Imports": "grDevices",
+        "Suggests": "knitr, rmarkdown, prettydoc, curl, jsonlite",
+        "SystemRequirements": "zlib, libpng, FreeType",
+        "URL": "https://github.com/yixuan/showtext",
+        "BugReports": "https://github.com/yixuan/showtext/issues",
+        "License": "Apache License (>= 2.0)",
+        "Copyright": "see file COPYRIGHTS",
+        "VignetteBuilder": "knitr, rmarkdown",
+        "RoxygenNote": "7.3.3",
+        "Encoding": "UTF-8",
+        "NeedsCompilation": "yes",
+        "Packaged": "2026-03-21 05:34:29 UTC; qyx",
+        "Author": "Yixuan Qiu [aut, cre],\n  Dave Raggett [ctb] (UTF-8 library. See the AUTHORS file for details)",
+        "Maintainer": "Yixuan Qiu <yixuan.qiu@cos.name>",
+        "Repository": "RSPM",
+        "Date/Publication": "2026-03-21 06:40:02 UTC",
+        "Built": "R 4.5.0; x86_64-w64-mingw32; 2026-03-22 04:47:15 UTC; windows",
+        "Archs": "x64",
+        "RemoteType": "standard",
+        "RemoteRef": "showtext",
+        "RemotePkgRef": "showtext",
+        "RemoteRepos": "https://packagemanager.posit.co/cran/latest",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "0.9-8"
+      }
+    },
+    "showtextdb": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "showtextdb",
+        "Type": "Package",
+        "Title": "Font Files for the 'showtext' Package",
+        "Version": "3.0",
+        "Date": "2020-05-31",
+        "Author": "Yixuan Qiu and authors/contributors of the included fonts. See file\n    AUTHORS for details.",
+        "Maintainer": "Yixuan Qiu <yixuan.qiu@cos.name>",
+        "Description": "Providing font files that can be used by the 'showtext' package.",
+        "Imports": "sysfonts (>= 0.7), utils",
+        "Suggests": "curl",
+        "License": "Apache License (>= 2.0)",
+        "Copyright": "see file COPYRIGHTS",
+        "RoxygenNote": "7.1.0",
+        "NeedsCompilation": "no",
+        "Packaged": "2020-06-04 04:05:01 UTC; qyx",
+        "Repository": "RSPM",
+        "Date/Publication": "2020-06-04 08:10:02 UTC",
+        "Encoding": "UTF-8",
+        "Built": "R 4.5.0; ; 2025-04-09 19:55:36 UTC; windows",
+        "RemoteType": "standard",
+        "RemoteRef": "showtextdb",
+        "RemotePkgRef": "showtextdb",
+        "RemoteRepos": "https://packagemanager.posit.co/cran/latest",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "3.0"
+      }
+    },
     "sourcetools": {
       "Source": "CRAN",
       "Repository": "https://packagemanager.posit.co/cran/latest",
@@ -4079,6 +4150,41 @@
         "RemoteRef": "sys",
         "RemoteRepos": "https://cran.rstudio.com",
         "RemoteSha": "3.4.3"
+      }
+    },
+    "sysfonts": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "sysfonts",
+        "Type": "Package",
+        "Title": "Loading Fonts into R",
+        "Version": "0.8.9",
+        "Date": "2024-03-02",
+        "Author": "Yixuan Qiu and authors/contributors of the\n    included fonts. See file AUTHORS for details.",
+        "Maintainer": "Yixuan Qiu <yixuan.qiu@cos.name>",
+        "Description": "Loading system fonts and Google Fonts\n    <https://fonts.google.com/> into R, in order to\n    support other packages such as 'R2SWF' and 'showtext'.",
+        "Suggests": "curl, jsonlite",
+        "Copyright": "see file COPYRIGHTS",
+        "SystemRequirements": "zlib, libpng, FreeType",
+        "URL": "https://github.com/yixuan/sysfonts",
+        "BugReports": "https://github.com/yixuan/sysfonts/issues",
+        "License": "GPL-2",
+        "RoxygenNote": "7.3.1",
+        "Encoding": "UTF-8",
+        "NeedsCompilation": "yes",
+        "Packaged": "2024-03-02 01:48:02 UTC; qyx",
+        "Repository": "RSPM",
+        "Date/Publication": "2024-03-02 03:40:02 UTC",
+        "Built": "R 4.5.0; x86_64-w64-mingw32; 2025-04-09 19:50:42 UTC; windows",
+        "Archs": "x64",
+        "RemoteType": "standard",
+        "RemoteRef": "sysfonts",
+        "RemotePkgRef": "sysfonts",
+        "RemoteRepos": "https://packagemanager.posit.co/cran/latest",
+        "RemoteReposName": "CRAN",
+        "RemotePkgPlatform": "x86_64-w64-mingw32",
+        "RemoteSha": "0.8.9"
       }
     },
     "systemfonts": {
@@ -4843,40 +4949,19 @@
   },
   "files": {
     ".RData": {
-      "checksum": "9246597e6097cd3f29fc655593ddeefc"
+      "checksum": "e9dbbae66ee3b76c5da42d699f7d1dc8"
     },
     ".Renviron": {
       "checksum": "fc05784ec7fdeceb105db32e11d67c44"
     },
     ".Rprofile": {
-      "checksum": "0910befdacbdd3aa9c7770dbd443f98c"
+      "checksum": "ccf3fc16b37019b8d9e3487545ee79a1"
     },
     "app.R": {
-      "checksum": "c41e8900cd7604fd9908ccc63d86c5c4"
-    },
-    "data/2026 camera trap locations.csv": {
-      "checksum": "6c09054272ef7bd5d723f9f6b2a21084"
-    },
-    "data/all_deployments - Copy.csv": {
-      "checksum": "a42ed257bae182338555069524584904"
-    },
-    "data/all_deployments - Copy1.csv": {
-      "checksum": "f01f140d299af108d6b74bd716f654b5"
-    },
-    "data/all_deployments.csv": {
-      "checksum": "274679f0e20c8314aadd29909a278330"
-    },
-    "data/camera_stats.csv": {
-      "checksum": "afc341e4ef0a5f6490c65f9abd82f7ae"
-    },
-    "data/schema.ini": {
-      "checksum": "3fb9141566a60c4c56c91e1c876bdc72"
-    },
-    "data/species_info.csv": {
-      "checksum": "e1706c6b17687826211468a8d78002c7"
+      "checksum": "724efffada5ce95faf3323dce61ab7a2"
     },
     "renv.lock": {
-      "checksum": "7648cc8451594814805420a29ba95504"
+      "checksum": "6a439fba3e078bcc4c236e3f1e72898a"
     }
   },
   "users": null
