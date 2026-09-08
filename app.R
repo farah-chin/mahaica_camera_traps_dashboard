@@ -497,20 +497,25 @@ ui <- page_navbar(
   nav_panel(
     "Species detail",
     icon = icon("paw"),
-    layout_sidebar(sidebar = sidebar(
-      width = 250,
-      bg = "#f0f4f8",
-      selectInput(
-        "detail_species",
-        "Select Species:",
-        choices = species_list
+    layout_sidebar(
+      sidebar = sidebar(
+        width = 250,
+        bg = "#f0f4f8",
+        selectInput("species_detail", "Select Species:", choices = species_list),
+        
+        hr(),
+        #uiOutput("species_info_card")
+        uiOutput("iucn_link_button")
       ),
       
-      hr()
-      #uiOutput("species_info_card")
-    ),
-    
-    # uiOutput("iucn_iframe")
+      # uiOutput("iucn_iframe")
+      # tags$iframe(
+      #   src = "https://www.iucnredlist.org/species/22697200/171903244",
+      #   width = "100%",
+      #   height = "800px",
+      #   frameBorder = "0",
+      #   style = "border: none;"
+      # )
     )
   ),
   
@@ -546,7 +551,7 @@ server <- function(input, output, session) {
   # Debounce all inputs by 400ms so charts don't re-render on every
   # intermediate value during rapid slider drags or dropdown changes
   
-  # MAIN PAGE LOGIC -----  
+  # MAIN PAGE LOGIC -----
   
   iucn_status_d <- reactive(input$iucn_status) %>% debounce(400)
   taxa_d              <- reactive(input$taxa)             %>% debounce(400)
@@ -693,7 +698,7 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     leaflet(locations) %>%
-      fitBounds(~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
+      fitBounds( ~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
       # Report bounds back to Shiny on every move so charts can filter by extent
@@ -1358,7 +1363,28 @@ server <- function(input, output, session) {
   # filtered reactives ----
   species_detail_d <- reactive(input$species_detail) %>% debounce(400)
   
-  species_row <- reactive({species_info %>% filter(SpeciesCommonName == species_detail_d())})
+  # species_row <- reactive({
+  #   species_info %>% filter(SpeciesCommonName == species_detail_d())
+  # })
+  
+  # reactive button -----
+  output$iucn_link_button <- renderUI({
+    species_row <- species_info %>% filter(SpeciesCommonName == input$species_detail)
+    
+    req(nrow(species_row) > 0)
+    
+    iucn_url <- species_row$IUCN_link[1]
+    
+    req(!is.na(iucn_url), iucn_url != "")
+    
+    tags$a(
+      href = iucn_url,
+      target = "_blank",
+      class = "btn btn-primary",
+      icon("external-link"),
+      "View IUCN Red List"
+    )
+  })
   
 }
 
