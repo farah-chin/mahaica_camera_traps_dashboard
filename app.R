@@ -546,6 +546,8 @@ server <- function(input, output, session) {
   # Debounce all inputs by 400ms so charts don't re-render on every
   # intermediate value during rapid slider drags or dropdown changes
   
+  # MAIN PAGE LOGIC -----  
+  
   iucn_status_d <- reactive(input$iucn_status) %>% debounce(400)
   taxa_d              <- reactive(input$taxa)             %>% debounce(400)
   species_d           <- reactive(input$species)          %>% debounce(400)
@@ -1350,6 +1352,14 @@ server <- function(input, output, session) {
       )
     p
   })
+  
+  # SPECIES DETAIL PAGE LOGIC -----
+  
+  # filtered reactives ----
+  species_detail_d <- reactive(input$species_detail) %>% debounce(400)
+  
+  species_row <- reactive({species_info %>% filter(SpeciesCommonName == species_detail_d())})
+  
 }
 
 # ----- 5. RUN APPLICATION -----
