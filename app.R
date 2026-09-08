@@ -503,13 +503,15 @@ ui <- page_navbar(
       selectInput(
         "detail_species",
         "Select Species:",
-        choices = c("All", species_list),
-        selected = "All"
+        choices = species_list
       ),
       
       hr()
       #uiOutput("species_info_card")
-    ))
+    ),
+    
+    # uiOutput("iucn_iframe")
+    )
   ),
   
   # Camera detail tab ----
