@@ -184,6 +184,14 @@ iucn_colours <- c(
   "Data Deficient" = "#8C8C82"
 )
 
+taxa_colours <- c(
+  "Mammal" = "#4C956C",
+  "Bird" = "#4A83C4",
+  "Reptile" = "#E8872F",
+  "Amphibian" = "#8064A2",
+  "Other" = "#8064A2"
+)
+
 # fonts
 font_add_google("Inter", "Inter")
 font_add_google("DM Sans", "DM Sans")
@@ -191,37 +199,19 @@ font_add_google("DM Sans", "DM Sans")
 showtext_auto()
 
 plots_custom_theme <- function() {
-  theme_minimal(
-    base_family = "Inter",
-    base_size = 12
-  ) +
+  theme_minimal(base_family = "Inter", base_size = 12) +
     theme(
       # Plot background
-      plot.background  = element_rect(
-        fill = "#F5F4EF",
-        color = NA
-      ),
-      panel.background = element_rect(
-        fill = "#F5F4EF",
-        color = NA
-      ),
+      plot.background  = element_rect(fill = "#F5F4EF", color = NA),
+      panel.background = element_rect(fill = "#F5F4EF", color = NA),
       
       # Grid
-      panel.grid.major = element_line(
-        color = "#D9DED8",
-        linewidth = 0.35
-      ),
+      panel.grid.major = element_line(color = "#D9DED8", linewidth = 0.35),
       panel.grid.minor = element_blank(),
       
       # Axes
-      axis.title = element_text(
-        color = "#34423A",
-        size = 11
-      ),
-      axis.text = element_text(
-        color = "#526057",
-        size = 10
-      ),
+      axis.title = element_text(color = "#34423A", size = 11),
+      axis.text = element_text(color = "#526057", size = 10),
       
       # Titles
       plot.title = element_text(
@@ -244,9 +234,7 @@ plots_custom_theme <- function() {
         face = "bold",
         color = "#34423A"
       ),
-      legend.text = element_text(
-        color = "#526057"
-      ),
+      legend.text = element_text(color = "#526057"),
       legend.position = "bottom",
       
       # Spacing
@@ -486,6 +474,8 @@ ui <- page_navbar(
         
         tags$br(),
         
+        tags$h4("Temporal Analysis"),
+        
         layout_columns(
           col_widths = c(9, 3),
           card(
@@ -699,7 +689,7 @@ server <- function(input, output, session) {
   
   output$map <- renderLeaflet({
     leaflet(locations) %>%
-      fitBounds( ~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
+      fitBounds(~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
       # Report bounds back to Shiny on every move so charts can filter by extent
@@ -1022,6 +1012,133 @@ server <- function(input, output, session) {
       )
   })
   
+  # taxa bar chart v2 -----
+  
+  output$taxa_plot2 <- renderPlotly({
+    pie_data <- fdata() %>%
+      count(Taxa, IUCN_status, name = "n") %>%
+      group_by(Taxa) %>%
+      mutate(taxa_total = sum(n),
+             pct_taxa = 100 * n / taxa_total) %>%
+      ungroup() %>%
+      mutate(total = sum(n), pct_total = 100 * n / total)
+    
+    taxa_data <- pie_data %>%
+      group_by(Taxa) %>%
+      summarise(n = sum(n), .groups = "drop") %>%
+      mutate(pct_total = 100 * n / sum(n))
+    
+    
+    
+    # Inner taxa ring
+    
+    
+    p <- plot_ly(
+      data = taxa_data,
+      labels = ~ Taxa,
+      values = ~ n,
+      type = "pie",
+      
+      textinfo = "label+value",
+      textposition = "inside",
+      
+      marker = list(
+        colors = unname(taxa_colours[as.character(taxa_data$Taxa)]),
+        line = list(color = "white", width = 2)
+      ),
+      
+      hovertemplate = paste0(
+        "<b>%{label}</b><br>",
+        "Count: %{value}<br>",
+        "% of all records: %{percent}",
+        "<extra></extra>"
+      ),
+      
+      domain = list(x = c(0.18, 0.82), y = c(0.18, 0.82)),
+      
+      showlegend = FALSE
+    )
+    
+    
+    
+    # Outer IUCN ring
+    
+    
+    p <- p %>%
+      add_trace(
+        data = pie_data,
+        
+        labels = ~ IUCN_status,
+        values = ~ n,
+        
+        type = "pie",
+        hole = 0.62,
+        
+        textinfo = "none",
+        
+        marker = list(
+          colors = unname(iucn_colours[as.character(pie_data$IUCN_status)]),
+          line = list(color = "white", width = 1.5)
+        ),
+        
+        customdata = ~ cbind(Taxa, pct_taxa, pct_total),
+        
+        hovertemplate = paste0(
+          "<b>%{customdata[1]} - %{label}</b><br>",
+          "Count: %{value}<br>",
+          "% of taxa: %{customdata[2]:.1f}%<br>",
+          "% of all records: %{customdata[3]:.1f}%",
+          "<extra></extra>"
+        ),
+        
+        showlegend = TRUE
+      )
+    
+    
+    
+    # Layout
+    
+    p %>%
+      layout(
+        title = list(text = "Taxonomic and IUCN Composition", font = list(size = 20)),
+        
+        annotations = list(
+          list(
+            x = 0.5,
+            y = 0.5,
+            
+            text = paste0(
+              "<b>Total Records</b><br>",
+              "<span style='font-size:28px'>",
+              sum(pie_data$n),
+              "</span>"
+            ),
+            
+            showarrow = FALSE,
+            
+            font = list(size = 14)
+          )
+        ),
+        
+        legend = list(
+          title = list(text = "IUCN Status"),
+          orientation = "v",
+          x = 1.02,
+          y = 0.5
+        ),
+        
+        margin = list(
+          l = 20,
+          r = 160,
+          t = 70,
+          b = 20
+        ),
+        
+        paper_bgcolor = "transparent",
+        plot_bgcolor = "transparent"
+      )
+  })
+  
   # Render iucn pie chart ----
   output$iucn_status_plot <- renderPlotly({
     colors <- c(
@@ -1112,8 +1229,13 @@ server <- function(input, output, session) {
   output$species_plot <- renderPlotly({
     p <- fdata() %>%
       mutate(SpeciesCommonName = fct_lump_n(SpeciesCommonName, 10)) %>%
-      count(SpeciesCommonName) %>%
-      ggplot(aes(x = reorder(SpeciesCommonName, -n), y = n)) +
+      count(SpeciesCommonName, IUCN_status) %>%
+      ggplot(aes(
+        x = reorder(SpeciesCommonName, -n),
+        y = n,
+        fill = IUCN_status,
+        group = IUCN_status
+      )) +
       # plots_custom_theme() +
       theme_minimal() +
       geom_col(aes(
@@ -1121,13 +1243,24 @@ server <- function(input, output, session) {
           "<b>",
           SpeciesCommonName,
           "</b><br><i>IUCN Status: ",
-          "IUCN_status",
+          IUCN_status,
           "</i>",
           "<br>Detections: ",
           n
         )
-      )) +
-      coord_flip() +
+      ), show.legend = FALSE) +
+      scale_fill_manual(
+        values = iucn_colours,
+        breaks = c(
+          "Least Concern",
+          "Near Threatened",
+          "Vulnerable",
+          "Endangered",
+          "Data Deficient"
+        ),
+        drop = FALSE
+      ) +
+      # coord_flip() +
       labs(x = "Species", y = "No. of detections") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
