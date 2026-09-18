@@ -161,6 +161,28 @@ tryCatch({
   
 })
 
+important_places_url <- paste0(
+  "https://services7.arcgis.com/3jO2fRV12whRxmim/",
+  "arcgis/rest/services/mahaica_important_places/",
+  "FeatureServer/0/query"
+)
+
+important_places <- st_read(
+  paste0(
+    important_places_url,
+    "?where=1%3D1",
+    "&outFields=*",
+    "&returnGeometry=true",
+    "&f=geojson"
+  ),
+  quiet = TRUE
+) %>% st_transform(4326)
+
+# https://services7.arcgis.com/3jO2fRV12whRxmim/arcgis/rest/services/mahaica_important_places/FeatureServer
+
+
+# PRELIMINARY VARIABLES -----
+
 # Merge tables using DeploymentID
 # dashboard_data <- deployments %>%
 #   inner_join(locations %>% select(DeploymentID, DDLat, DDLon), by = "DeploymentID")
@@ -701,6 +723,25 @@ server <- function(input, output, session) {
       fitBounds( ~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
+      # add important places as background labels
+      # addLabelOnlyMarkers(
+      #   data = important_places,
+      #   lng = ~st_coordinates(geometry)[, 1],
+      #   lat = ~st_coordinates(geometry)[, 2],
+      #   label = ~Name,
+      #   labelOptions = labelOptions(
+      #     noHide = TRUE,
+      #     direction = "top",
+      #     textOnly = TRUE,
+      #     style = list(
+      #       "font-size" = "11px",
+      #       "font-weight" = "400",
+      #       "color" = "#555555",
+      #       "text-shadow" = "0 0 3px white, 0 0 3px white"
+      #     )
+      #   ),
+      #   group = "Important Places"
+      # ) %>%
       # Report bounds back to Shiny on every move so charts can filter by extent
       
       htmlwidgets::onRender(
