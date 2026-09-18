@@ -726,6 +726,15 @@ server <- function(input, output, session) {
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
       
+      addLayersControl(
+        overlayGroups = c(
+          "Important Places"
+        ),
+        options = layersControlOptions(
+          collapsed = TRUE
+        )
+      ) %>%
+      
       # Report bounds back to Shiny on every move so charts can filter by extent
       
       
@@ -792,7 +801,8 @@ server <- function(input, output, session) {
             "border-radius" = "2px",
             "text-shadow" = "none"
           )
-        )
+        ),
+        group = "Important Places"
       )
     
     proxy %>%
