@@ -517,8 +517,8 @@ ui <- page_navbar(
   
   # Species detail tab ----
   nav_panel(
-    "Species detail",
-    icon = icon("paw"),
+    "",
+    # icon = icon("paw"),
     layout_sidebar(
       sidebar = sidebar(
         width = 250,
@@ -542,7 +542,9 @@ ui <- page_navbar(
   ),
   
   # Camera detail tab ----
-  nav_panel("Camera trap detail", icon = icon("camera"), layout_sidebar())
+  nav_panel("", 
+            # icon = icon("camera"), 
+            layout_sidebar())
   
 )
 
@@ -726,23 +728,26 @@ server <- function(input, output, session) {
       # add important places as background labels
       # addLabelOnlyMarkers(
       #   data = important_places,
-      #   lng = ~st_coordinates(geometry)[, 1],
-      #   lat = ~st_coordinates(geometry)[, 2],
-      #   label = ~Name,
+      #   label = ~ Name,
       #   labelOptions = labelOptions(
       #     noHide = TRUE,
       #     direction = "top",
       #     textOnly = TRUE,
       #     style = list(
-      #       "font-size" = "11px",
+      #       "font-size" = "10px",
       #       "font-weight" = "400",
-      #       "color" = "#555555",
-      #       "text-shadow" = "0 0 3px white, 0 0 3px white"
+      #       "color" = "#666666",
+      #       "background-color" = "rgba(255,255,255,0.65)",
+      #       "border" = "none",
+      #       "padding" = "1px 3px",
+      #       "border-radius" = "2px",
+      #       "text-shadow" = "none"
       #     )
-      #   ),
-      #   group = "Important Places"
+      #   )
       # ) %>%
+      
       # Report bounds back to Shiny on every move so charts can filter by extent
+      
       
       htmlwidgets::onRender(
         "
@@ -788,6 +793,27 @@ server <- function(input, output, session) {
           fill       = FALSE
         )
     }
+    
+    proxy %>%
+      addLabelOnlyMarkers(
+        data = important_places,
+        label = ~ Name,
+        labelOptions = labelOptions(
+          noHide = TRUE,
+          direction = "top",
+          textOnly = TRUE,
+          style = list(
+            "font-size" = "10px",
+            "font-weight" = "400",
+            "color" = "#FFFFFF",
+            # "background-color" = "rgba(255,255,255,0.65)",
+            "border" = "none",
+            "padding" = "1px 3px",
+            "border-radius" = "2px",
+            "text-shadow" = "none"
+          )
+        )
+      )
     
     proxy %>%
       addCircleMarkers(
