@@ -725,26 +725,6 @@ server <- function(input, output, session) {
       fitBounds( ~ min(DDLon), ~ min(DDLat), ~ max(DDLon), ~ max(DDLat)) %>%
       addResetMapButton() %>%
       addProviderTiles("Esri.WorldImagery") %>%
-      # add important places as background labels
-      # addLabelOnlyMarkers(
-      #   data = important_places,
-      #   label = ~ Name,
-      #   labelOptions = labelOptions(
-      #     noHide = TRUE,
-      #     direction = "top",
-      #     textOnly = TRUE,
-      #     style = list(
-      #       "font-size" = "10px",
-      #       "font-weight" = "400",
-      #       "color" = "#666666",
-      #       "background-color" = "rgba(255,255,255,0.65)",
-      #       "border" = "none",
-      #       "padding" = "1px 3px",
-      #       "border-radius" = "2px",
-      #       "text-shadow" = "none"
-      #     )
-      #   )
-      # ) %>%
       
       # Report bounds back to Shiny on every move so charts can filter by extent
       
@@ -805,7 +785,7 @@ server <- function(input, output, session) {
           style = list(
             "font-size" = "10px",
             "font-weight" = "400",
-            "color" = "#FFFFFF",
+            "color" = "#D3D3D3",
             # "background-color" = "rgba(255,255,255,0.65)",
             "border" = "none",
             "padding" = "1px 3px",
